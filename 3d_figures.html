@@ -17,8 +17,8 @@
 		        initViewport(gl, canvas);
 		        initGL(canvas);
 				initShader(gl);
-				// TO DO: create and draw the figures
-				run(gl, []);
+				var pyramid = createPyramid(gl, [-2.5,0,-5], [0.1, 1.0, 0.2]);
+				run(gl, [pyramid]);
 			}
 	);
 
@@ -27,7 +27,7 @@
 </head>
 <body>
 
-    <canvas id="webglcanvas" style="border: none;" width="500" height="500"></canvas>
+    <canvas id="webglcanvas" style="border: none;" width="1000" height="500"></canvas>
 
 </body>
 </html>

@@ -165,3 +165,101 @@ function run(gl, objs)
     for(i = 0; i<objs.length; i++)
         objs[i].update();
 }
+
+function createPyramid(gl, translation, rotationAxis){
+    var vertexBuffer;
+    vertexBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+
+    var verts = [
+       // Triangle 1
+        0.0,  1.0,  0.0,
+        1.0, -1.0, 0.0,
+        0.30901699437494745, -1.0, 0.9510565162951535,
+        -0.8090169943749473, -1.0, 0.5877852522924732,
+        -0.8090169943749475, -1.0, -0.587785252292473,
+        0.30901699437494723, -1.0, -0.9510565162951536,
+        0.0, -1.0,  0.0,
+    ];
+
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(verts), gl.STATIC_DRAW);
+
+    // Color data
+    var colorBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
+    var faceColors = [
+        [1.0, 0.0, 0.0, 1.0], // T1
+        [0.0, 1.0, 0.0, 1.0], // T2
+        [0.0, 0.0, 1.0, 1.0], // T3
+        [1.0, 1.0, 0.0, 1.0], // T4
+        [1.0, 0.0, 1.0, 1.0], // T5
+        [0.0, 1.0, 1.0, 1.0], // B1
+        [0.0, 1.0, 1.0, 1.0], // B2
+        [0.0, 1.0, 1.0, 1.0], // B3
+        [0.0, 1.0, 1.0, 1.0], // B4
+        [0.0, 1.0, 1.0, 1.0]  // B5
+    ];
+    
+    var vertexColors = [];
+    for (const color of faceColors) 
+    {
+        for (var j=0; j < 3; j++)
+            vertexColors = vertexColors.concat(color);
+    }
+
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertexColors), gl.STATIC_DRAW); 
+
+    // Index data (defines the triangles to be drawn).
+    var pyramidIndexBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, pyramidIndexBuffer);
+    var pyramidIndices = [
+        0, 1, 2, // T1
+        0, 2, 3, // T2
+        0, 3, 4, // T3
+        0, 4, 5, // T4
+        0, 5, 1, // T5
+
+        6, 1, 2, // B1
+        6, 2, 3, // B2
+        6, 3, 4, // B3
+        6, 4, 5, // B4
+        6, 5, 1, // B5
+    ];
+
+    // gl.ELEMENT_ARRAY_BUFFER: Buffer used for element indices.
+    // Uint16Array: Array of 16-bit unsigned integers.
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(pyramidIndices), gl.STATIC_DRAW);
+
+    var pyramid = {
+        buffer: vertexBuffer,
+        colorBuffer: colorBuffer,
+        indices: pyramidIndexBuffer,
+        vertSize: 3,
+        nVerts: 7,
+        colorSize: 4,
+        nColors: 30,
+        nIndices: 30,
+        primtype:gl.TRIANGLES,
+        modelViewMatrix: mat4.create(), 
+        currentTime : Date.now()
+    }
+
+    mat4.translate(pyramid.modelViewMatrix, pyramid.modelViewMatrix, translation);
+
+    pyramid.update = function(){
+        var now = Date.now();
+        var deltat = now - this.currentTime;
+        this.currentTime = now;
+        var fract = deltat / duration;
+        var angle = Math.PI * 2 * fract;
+    
+        // Rotates a mat4 by the given angle
+        // mat4 out the receiving matrix
+        // mat4 a the matrix to rotate
+        // Number rad the angle to rotate the matrix by
+        // vec3 axis the axis to rotate around
+        mat4.rotate(this.modelViewMatrix, this.modelViewMatrix, angle, rotationAxis);
+    }
+
+    return pyramid;
+}
