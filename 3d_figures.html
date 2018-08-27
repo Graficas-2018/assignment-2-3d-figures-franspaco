@@ -17,8 +17,11 @@
 		        initViewport(gl, canvas);
 		        initGL(canvas);
 				initShader(gl);
-				var pyramid = createPyramid(gl, [-2.5,0,-5], [0.1, 1.0, 0.2]);
-				run(gl, [pyramid]);
+				//var pyramid = createPyramid(gl, [-2.5,0,-5], [0.1, 1.0, 0.2]);
+				var pyramid = makePyr(gl, [-2.5, 0, -5], [0.1, 1.0, 0.2]);
+				var octahedron = makeOcta(gl, [2.5, 0, -5], [0, 1, 0]);
+				var scutoid = makeScutoid(gl, [0, 0, -5], [-0.4, 1.0, 0.1]);
+				run(gl, [pyramid, octahedron, scutoid]);
 			}
 	);
 

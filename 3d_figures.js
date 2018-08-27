@@ -166,13 +166,18 @@ function run(gl, objs)
         objs[i].update();
 }
 
-function createPyramid(gl, translation, rotationAxis){
-    var vertexBuffer;
-    vertexBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+var colors = [
+    [1.0, 0.0, 0.0, 1.0], // Red
+    [0.0, 1.0, 0.0, 1.0], // Green
+    [0.0, 0.0, 1.0, 1.0], // Blue
+    [1.0, 1.0, 0.0, 1.0], // Yellow
+    [1.0, 0.0, 1.0, 1.0], // Cyan
+    [0.0, 1.0, 1.0, 1.0], // Magenta
 
+];
+
+function makePyr(gl, translation, rotationAxis){
     var verts = [
-       // Triangle 1
         0.0,  1.0,  0.0,
         1.0, -1.0, 0.0,
         0.30901699437494745, -1.0, 0.9510565162951535,
@@ -181,37 +186,6 @@ function createPyramid(gl, translation, rotationAxis){
         0.30901699437494723, -1.0, -0.9510565162951536,
         0.0, -1.0,  0.0,
     ];
-
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(verts), gl.STATIC_DRAW);
-
-    // Color data
-    var colorBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
-    var faceColors = [
-        [1.0, 0.0, 0.0, 1.0], // T1
-        [0.0, 1.0, 0.0, 1.0], // T2
-        [0.0, 0.0, 1.0, 1.0], // T3
-        [1.0, 1.0, 0.0, 1.0], // T4
-        [1.0, 0.0, 1.0, 1.0], // T5
-        [0.0, 1.0, 1.0, 1.0], // B1
-        [0.0, 1.0, 1.0, 1.0], // B2
-        [0.0, 1.0, 1.0, 1.0], // B3
-        [0.0, 1.0, 1.0, 1.0], // B4
-        [0.0, 1.0, 1.0, 1.0]  // B5
-    ];
-    
-    var vertexColors = [];
-    for (const color of faceColors) 
-    {
-        for (var j=0; j < 3; j++)
-            vertexColors = vertexColors.concat(color);
-    }
-
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertexColors), gl.STATIC_DRAW); 
-
-    // Index data (defines the triangles to be drawn).
-    var pyramidIndexBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, pyramidIndexBuffer);
     var pyramidIndices = [
         0, 1, 2, // T1
         0, 2, 3, // T2
@@ -226,27 +200,163 @@ function createPyramid(gl, translation, rotationAxis){
         6, 5, 1, // B5
     ];
 
-    // gl.ELEMENT_ARRAY_BUFFER: Buffer used for element indices.
-    // Uint16Array: Array of 16-bit unsigned integers.
-    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(pyramidIndices), gl.STATIC_DRAW);
+    var colorIndices = [
+        0, 1, 2, 3, 4, 5, 5, 5, 5, 5
+    ];
 
-    var pyramid = {
+    return makeFigure(gl, verts, pyramidIndices, colors, colorIndices, translation, rotationAxis);
+}
+
+function makeOcta(gl, translation, rotationAxis){
+    var verts = [
+         1.0,  0.0,  0.0,
+        -1.0,  0.0,  0.0,
+         0.0,  1.0,  0.0,
+         0.0, -1.0,  0.0,
+         0.0,  0.0,  1.0,
+         0.0,  0.0, -1.0
+    ];
+    var indices = [
+        0, 2, 5,
+        0, 5, 3,
+        0, 3, 4,
+        0, 4, 2,
+
+        1, 2, 5,
+        1, 5, 3,
+        1, 3, 4,
+        1, 4, 2,
+    ];
+
+    var colorIndices = [
+        0, 1, 2, 3, 2, 3, 0, 1
+    ];
+
+    return makeFigure(gl, verts, indices, colors, colorIndices, translation, rotationAxis);
+}
+
+function makeScutoid(gl, translation, rotationAxis){
+    var verts = [
+        // Bottom pentagon
+        1.0, -1.0, 0.0,                                 // 0
+        0.30901699437494745, -1.0, 0.9510565162951535,  // 1
+        -0.8090169943749473, -1.0, 0.5877852522924732,  // 2
+        -0.8090169943749475, -1.0, -0.587785252292473,  // 3
+        0.30901699437494723, -1.0, -0.9510565162951536, // 4
+
+        // Top Hexagon
+        0.8660254037844387, 1.0, 0.5,                   // 5
+        0.0, 1.0, 1.0,                                  // 6
+        -0.8660254037844387, 1.0, 0.5,                  // 7
+        -0.8660254037844386, 1.0, -0.5,                 // 8
+        0.0, 1.0, -1.0,                                 // 9
+        0.8660254037844384, 1.0, -0.5,                  // 10
+
+        // Extra point
+        1, 0.0, 0                                       // 11
+    ];
+
+    var indices = [
+        // Pentagon
+        0, 1, 2,
+        0, 2, 3,
+        0, 3, 4,
+        // Hexagon
+        5, 6, 7,
+        5, 7, 8,
+        5, 8, 10,
+        10, 8, 9,
+        // Triangle
+        5, 10, 11,
+        // Back
+        2, 7, 8,
+        2, 8, 3,
+        // Side 1
+        2, 1, 6,
+        2, 6, 7,
+        // Side 2
+        3, 8, 9,
+        3, 4, 9,
+        // Front 1
+        10, 9, 4,
+        10, 4, 0,
+        10, 0, 11,
+        // Front 2
+        5, 1, 6,
+        5, 0, 1,
+        5, 0, 11
+    ];
+
+    var colorIndices = [
+        // Pentagon
+        0, 0, 0,
+        // Hexagon
+        0, 0, 0, 0,
+        // Triangle
+        1,
+        // Back
+        1, 1,
+        // Side 1
+        5, 5,
+        // Side 2
+        2, 2,
+        // Front 1
+        4, 4, 4,
+        // Front 2
+        2, 2, 2
+    ];
+    return makeFigure(gl, verts, indices, colors, colorIndices, translation, rotationAxis);
+}
+
+function makeFigure(gl, verts, indices, colorList, colorIndices, translation, rotationAxis){
+
+    var allVerts = [];
+    for(var index in indices){
+        allVerts.push(verts[indices[index]*3 + 0]);
+        allVerts.push(verts[indices[index]*3 + 1]);
+        allVerts.push(verts[indices[index]*3 + 2]);
+    }
+
+    var vertexBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(allVerts), gl.STATIC_DRAW);
+
+    var vertexColors = [];
+    for(var indx in colorIndices){
+        for( var i = 0; i < 3; i++)
+            vertexColors = vertexColors.concat(colorList[colorIndices[indx]]);
+    }
+
+    var colorBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertexColors), gl.STATIC_DRAW);
+
+
+    var figureIndexBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, figureIndexBuffer);
+    var figureIndices = [];
+    for (var num = 0; num < allVerts.length/3; num++){
+        figureIndices.push(Number(num));
+    }
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(figureIndices), gl.STATIC_DRAW);
+
+    var figure = {
         buffer: vertexBuffer,
         colorBuffer: colorBuffer,
-        indices: pyramidIndexBuffer,
+        indices: figureIndexBuffer,
         vertSize: 3,
-        nVerts: 7,
+        nVerts: (allVerts.length)/3,
         colorSize: 4,
-        nColors: 30,
-        nIndices: 30,
+        nColors: (colorBuffer.length)/4,
+        nIndices: figureIndices.length,
         primtype:gl.TRIANGLES,
         modelViewMatrix: mat4.create(), 
         currentTime : Date.now()
-    }
+    };
 
-    mat4.translate(pyramid.modelViewMatrix, pyramid.modelViewMatrix, translation);
+    mat4.translate(figure.modelViewMatrix, figure.modelViewMatrix, translation);
 
-    pyramid.update = function(){
+    figure.update = function(){
         var now = Date.now();
         var deltat = now - this.currentTime;
         this.currentTime = now;
@@ -261,5 +371,5 @@ function createPyramid(gl, translation, rotationAxis){
         mat4.rotate(this.modelViewMatrix, this.modelViewMatrix, angle, rotationAxis);
     }
 
-    return pyramid;
+    return figure;
 }
