@@ -232,7 +232,24 @@ function makeOcta(gl, translation, rotationAxis){
         0, 1, 2, 3, 2, 3, 0, 1
     ];
 
-    return makeFigure(gl, verts, indices, colors, colorIndices, translation, rotationAxis);
+    var octa = makeFigure(gl, verts, indices, colors, colorIndices, translation, rotationAxis);
+
+    octa.update = function(){
+        var now = Date.now();
+        var deltat = now - this.currentTime;
+        this.currentTime = now;
+        var fract = deltat / duration;
+        var angle = Math.PI * 2 * fract;
+        mat4.rotate(this.modelViewMatrix, this.modelViewMatrix, angle, rotationAxis);
+
+        var currY = this.modelViewMatrix[13];
+        var targetY = Math.sin(0.005 * now);
+
+        var pos = [ 0, targetY - currY, 0];
+        mat4.translate(this.modelViewMatrix, this.modelViewMatrix, pos);
+        
+    }
+    return octa;
 }
 
 function makeScutoid(gl, translation, rotationAxis){
